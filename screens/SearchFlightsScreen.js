@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import Input from '../components/Input';
 import FlightsList from '../components/FlightsList';
 import Colors from '../constants/colors';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 
@@ -16,11 +17,13 @@ const SearchFlightsScreen = props => {
     const [result, setResult] = useState();
     const [searched, setSearched] = useState(false);
     const [notification, setNotification] = useState('');
-    const [listShow, setListShow] = useState();
+    const [isLoading, setIsLoading] = useState(false);
 
     //const fetchFlights = () => {
     const fetchFlights = async () => {
         try {
+            setIsLoading(true);
+            setNotification('');
             let params = '?from=' + fromValue + '&to=' + toValue + '&date=' + dateValue;
             let url = 'https://7fbvuzi711.execute-api.us-east-1.amazonaws.com/Dev/getflights' + params;
 
@@ -30,10 +33,12 @@ const SearchFlightsScreen = props => {
                 let resData = await response.json();
                 //alert(JSON.stringify(resData,null,2));
                 if ((resData).length == 0) {
+                    setIsLoading(false);
                     setResult('');
                     setSearched(false);
                     setNotification('No flights available in the selected date!');
                 } else {
+                    setIsLoading(false);
                     setNotification('');
                     setSearched(true);
                     setResult(resData);
@@ -67,6 +72,7 @@ const SearchFlightsScreen = props => {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} >
             <View style={styles.screen}>
+            <ScrollView style={styles.cardContainer}>
                 <Card style={styles.inputContainer}>
                     <Text style={styles.cardText}>Find your next flight!</Text>
                     <View style={styles.inputLine}>
@@ -126,8 +132,9 @@ const SearchFlightsScreen = props => {
                         </View>
                     </View>
                 </Card>
+                </ScrollView>
                 <Text style={styles.notiText}>{notification}</Text>
-                <FlightsList flights={result} searched={searched} />
+                <FlightsList flights={result} searched={searched} loading={isLoading}/>
             </View>
         </TouchableWithoutFeedback>
     );
@@ -149,6 +156,9 @@ const styles = StyleSheet.create({
         maxWidth: '80%',
         alignItems: 'center',
         margin: 30
+    }, 
+    cardContainer: {
+        height: 10
     },
     cardText: {
         fontSize: 16,

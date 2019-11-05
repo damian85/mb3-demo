@@ -14,7 +14,8 @@ const styles = StyleSheet.create({
     item: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
-        borderWidth:1
+        borderWidth:1,
+        borderRadius:10
     },
     text: {
         padding: 10
