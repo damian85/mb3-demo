@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, Image, ImageBackground, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import DatePicker from 'react-native-datepicker';
 
 import Card from '../components/Card';
 import Input from '../components/Input';
@@ -11,60 +12,122 @@ import Colors from '../constants/colors';
 const SearchFlightsScreen = props => {
     const [fromValue, setFromValue] = useState('');
     const [toValue, setToValue] = useState('');
+    const [dateValue, setDateValue] = useState('');
     const [result, setResult] = useState();
+    const [searched, setSearched] = useState(false);
+    const [notification, setNotification] = useState('');
+    const [listShow, setListShow] = useState();
 
+    //const fetchFlights = () => {
     const fetchFlights = async () => {
         try {
-            let response = await fetch(
-                'https://7fbvuzi711.execute-api.us-east-1.amazonaws.com/Dev/getflights?from=EZE&to=MAD&date=2019-11-25'
-            );
-            if (response.ok){
+            let params = '?from=' + fromValue + '&to=' + toValue + '&date=' + dateValue;
+            let url = 'https://7fbvuzi711.execute-api.us-east-1.amazonaws.com/Dev/getflights' + params;
+
+
+            let response = await fetch(url);
+            if (response.ok) {
                 let resData = await response.json();
-                setResult(resData);
+                //alert(JSON.stringify(resData,null,2));
+                if ((resData).length == 0) {
+                    setResult('');
+                    setSearched(false);
+                    setNotification('No flights available in the selected date!');
+                } else {
+                    setNotification('');
+                    setSearched(true);
+                    setResult(resData);
+                }
+
+            } else {
+                setResult('No flights available for the selected dates');
             }
-            throw new Error('No results!');
+            //throw new Error('No results!');
             //console.log(resData);
             //return resData;
         } catch (err) {
             console.error(err);
         }
+
+        /*fetch(
+            'https://7fbvuzi711.execute-api.us-east-1.amazonaws.com/Dev/getflights?from=EZE&to=MAD&date=2019-11-25'
+        )
+            .then(res => res.json())
+            .then(json => setResult(json));*/
     };
-   
+
+    const fromInputHandler = inputText => {
+        setFromValue(inputText.replace(/([0-9])/g, '')); //replace numeric value
+    };
+
+    const toInputHandler = inputText => {
+        setToValue(inputText.replace(/([0-9])/g, '')); //replace numeric value
+    };
 
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} >
             <View style={styles.screen}>
-                <FlightsList flights={result}/>
                 <Card style={styles.inputContainer}>
-                    <Text>Search your next flight!</Text>
+                    <Text style={styles.cardText}>Find your next flight!</Text>
                     <View style={styles.inputLine}>
                         <Input
                             style={styles.input}
                             blurOnSubmit
                             autoCapitalize='none'
                             autoCorrect={false}
-                            //keyboardType="number-pad"
-                            // maxLength={2}
-                            // onChangeText={numberInputHandler}
+                            onChangeText={fromInputHandler}
                             placeholder='From'
-                            value={fromValue} 
+                            value={fromValue}
                         />
                         <Input
                             style={styles.input}
                             blurOnSubmit
                             autoCapitalize='none'
                             autoCorrect={false}
-                            //keyboardType="number-pad"
-                            // maxLength={2}
-                            // onChangeText={numberInputHandler}
+                            onChangeText={toInputHandler}
                             placeholder='To'
-                        //value={} 
+                            value={toValue}
+                        />
+                        <DatePicker
+                            style={{
+                                width: 120,
+                                height: 30,
+                                borderBottomColor: 'grey',
+                                borderTopWidth: 0,
+                                borderBottomWidth: 1,
+                                marginVertical: 10
+                            }}
+                            date={dateValue}
+                            mode="date"
+                            placeholder="select date"
+                            format="YYYY-MM-DD"
+                            minDate="2019-11-04"
+                            maxDate="2030-06-01"
+                            confirmBtnText="Confirm"
+                            cancelBtnText="Cancel"
+                            customStyles={{
+                                dateIcon: {
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    marginLeft: 0
+                                },
+                                dateInput: {
+                                    marginLeft: 36,
+                                    borderWidth: 0
+                                }
+                            }}
+                            onDateChange={(date) => { setDateValue(date) }}
                         />
                     </View>
                     <View style={styles.buttonContainer}>
-                        <View style={styles.button}><Button title="Search" onPress={() => { }} color={Colors.primary} /></View>
+                        <View style={styles.button}>
+                            <Button title="Search" onPress={fetchFlights} color={Colors.primary} />
+                        </View>
                     </View>
                 </Card>
+                <Text style={styles.notiText}>{notification}</Text>
+                <FlightsList flights={result} searched={searched} />
             </View>
         </TouchableWithoutFeedback>
     );
@@ -84,7 +147,12 @@ const styles = StyleSheet.create({
     inputContainer: {
         width: 300,
         maxWidth: '80%',
-        alignItems: 'center'
+        alignItems: 'center',
+        margin: 30
+    },
+    cardText: {
+        fontSize: 16,
+        fontWeight: 'bold'
     },
     inputLine: {
         flexDirection: 'row',
@@ -95,6 +163,10 @@ const styles = StyleSheet.create({
         width: 50,
         textAlign: 'center',
         margin: 10
+    },
+    notiText:{
+        color: 'red',
+        fontWeight: 'bold'
     },
     buttonContainer: {
         flexDirection: 'row',
