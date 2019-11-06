@@ -28,6 +28,9 @@
     },
     "android": {
       "package": "com.octank.flightsearch"
-    }
-  }
+    },
+    "entryPoint": "node_modules/expo/AppEntry.js"
+  },
+  "displayName": "MasterBuilder 3 - Demo",
+  "name": "masterbuilder3_demoflights"
 }

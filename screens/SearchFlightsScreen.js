@@ -172,7 +172,9 @@ const styles = StyleSheet.create({
     input: {
         width: 50,
         textAlign: 'center',
-        margin: 10
+        justifyContent: 'center',
+        margin: 10,
+        alignItems: 'center'
     },
     notiText:{
         color: 'red',
