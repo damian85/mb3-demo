@@ -2,14 +2,18 @@ version: 0.2
 
 phases:
   #pre_build:
-   # commands:
-    #  - export ANDROID_HOME=/opt/android-sdk-linux
-     # - export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+  # commands:
+  #  - export ANDROID_HOME=/opt/android-sdk-linux
+  # - export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+  install:
+    runtime-versions:
+      java: corretto8
+      android: 28
   build:
     commands:
       - cd android
       - ./gradlew assembleRelease
 artifacts:
   files:
-     - './android/app/build/outputs/*/.apk'
+    - "./android/app/build/outputs/**/*.apk"
   discard-paths: yes
